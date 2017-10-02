@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WifiOverwatch
 {
@@ -18,7 +20,7 @@ namespace WifiOverwatch
             return result;
         }
 
-        public static bool IsNumeric(string text, string message = null)
+        public static ParseResult<int> IsNumeric(string text, string message = null)
         {
             int intValue;
             var result = int.TryParse(text, out intValue);
@@ -31,7 +33,53 @@ namespace WifiOverwatch
                     : message);
             }
 
-            return result;
+            return new ParseResult<int>()
+            {
+                IsParseSuccessful = result,
+                Value = intValue
+            };
         }
+
+        public static ParseResult<TimeSpan> IsValidTimeFormat(string text, string timeFormat, string message = "Ilegal date time format")
+        {
+            TimeSpan value;
+            var format = GetFormatMatch(timeFormat);
+            if (!MatchFormat(text, format))
+            {
+                MessageBox.Show(message);
+                return new ParseResult<TimeSpan>()
+                {
+                    IsParseSuccessful = false
+                };
+            }
+            var verdict = TimeSpan.TryParse(text, out value);
+
+            return new ParseResult<TimeSpan>()
+            {
+                Value = value,
+                IsParseSuccessful = verdict
+            };
+        }
+
+        private static string GetFormatMatch(string inputString)
+        {
+            if (Regex.IsMatch(inputString, "hh:MM"))
+            {
+                return "[0-9][0-9]:[0-9][0-9]";
+            }
+
+            throw new Exception("No valid pattern found for the time input");
+        }
+
+        private static bool MatchFormat(string inputString, string format)
+        {
+            return Regex.IsMatch(inputString, format);
+        }
+    }
+
+    public class ParseResult<T>
+    {
+        public T Value { get; set; }
+        public bool IsParseSuccessful { get; set; }
     }
 }

@@ -44,6 +44,9 @@ namespace WifiOverwatch
             this.autoReconnectFailureCountInputTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.saveSessionButton = new System.Windows.Forms.Button();
+            this.endTimeLabel = new System.Windows.Forms.Label();
+            this.endTimeTextBox = new System.Windows.Forms.TextBox();
+            this.automaticEndTimeCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // beginPingButton
@@ -60,7 +63,7 @@ namespace WifiOverwatch
             // 
             this.autoReconnectCheckbox.AutoSize = true;
             this.autoReconnectCheckbox.ForeColor = System.Drawing.Color.Lime;
-            this.autoReconnectCheckbox.Location = new System.Drawing.Point(12, 103);
+            this.autoReconnectCheckbox.Location = new System.Drawing.Point(17, 74);
             this.autoReconnectCheckbox.Name = "autoReconnectCheckbox";
             this.autoReconnectCheckbox.Size = new System.Drawing.Size(151, 24);
             this.autoReconnectCheckbox.TabIndex = 1;
@@ -69,7 +72,7 @@ namespace WifiOverwatch
             // 
             // stopPingButton
             // 
-            this.stopPingButton.Location = new System.Drawing.Point(596, 86);
+            this.stopPingButton.Location = new System.Drawing.Point(596, 87);
             this.stopPingButton.Name = "stopPingButton";
             this.stopPingButton.Size = new System.Drawing.Size(141, 56);
             this.stopPingButton.TabIndex = 3;
@@ -81,7 +84,7 @@ namespace WifiOverwatch
             // 
             this.quickTestCheckBox.AutoSize = true;
             this.quickTestCheckBox.ForeColor = System.Drawing.Color.Lime;
-            this.quickTestCheckBox.Location = new System.Drawing.Point(12, 29);
+            this.quickTestCheckBox.Location = new System.Drawing.Point(17, 29);
             this.quickTestCheckBox.Name = "quickTestCheckBox";
             this.quickTestCheckBox.Size = new System.Drawing.Size(114, 24);
             this.quickTestCheckBox.TabIndex = 4;
@@ -139,7 +142,7 @@ namespace WifiOverwatch
             // 
             // autoReconnectFailureCountInputTextBox
             // 
-            this.autoReconnectFailureCountInputTextBox.Location = new System.Drawing.Point(412, 101);
+            this.autoReconnectFailureCountInputTextBox.Location = new System.Drawing.Point(463, 74);
             this.autoReconnectFailureCountInputTextBox.Name = "autoReconnectFailureCountInputTextBox";
             this.autoReconnectFailureCountInputTextBox.Size = new System.Drawing.Size(44, 26);
             this.autoReconnectFailureCountInputTextBox.TabIndex = 10;
@@ -148,7 +151,7 @@ namespace WifiOverwatch
             // 
             this.label1.AutoSize = true;
             this.label1.ForeColor = System.Drawing.Color.Lime;
-            this.label1.Location = new System.Drawing.Point(169, 104);
+            this.label1.Location = new System.Drawing.Point(217, 77);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(228, 20);
             this.label1.TabIndex = 11;
@@ -164,12 +167,44 @@ namespace WifiOverwatch
             this.saveSessionButton.UseVisualStyleBackColor = true;
             this.saveSessionButton.Click += new System.EventHandler(this.saveSessionButton_Click);
             // 
+            // endTimeLabel
+            // 
+            this.endTimeLabel.AutoSize = true;
+            this.endTimeLabel.ForeColor = System.Drawing.Color.Lime;
+            this.endTimeLabel.Location = new System.Drawing.Point(217, 120);
+            this.endTimeLabel.Name = "endTimeLabel";
+            this.endTimeLabel.Size = new System.Drawing.Size(76, 40);
+            this.endTimeLabel.TabIndex = 14;
+            this.endTimeLabel.Text = "End Time\r\n\r\n";
+            // 
+            // endTimeTextBox
+            // 
+            this.endTimeTextBox.Location = new System.Drawing.Point(463, 117);
+            this.endTimeTextBox.Name = "endTimeTextBox";
+            this.endTimeTextBox.Size = new System.Drawing.Size(100, 26);
+            this.endTimeTextBox.TabIndex = 15;
+            // 
+            // automaticEndTimeCheckbox
+            // 
+            this.automaticEndTimeCheckbox.AutoSize = true;
+            this.automaticEndTimeCheckbox.ForeColor = System.Drawing.Color.Lime;
+            this.automaticEndTimeCheckbox.Location = new System.Drawing.Point(17, 120);
+            this.automaticEndTimeCheckbox.Name = "automaticEndTimeCheckbox";
+            this.automaticEndTimeCheckbox.Size = new System.Drawing.Size(178, 24);
+            this.automaticEndTimeCheckbox.TabIndex = 16;
+            this.automaticEndTimeCheckbox.Text = "Automatic End Time";
+            this.automaticEndTimeCheckbox.UseVisualStyleBackColor = true;
+            this.automaticEndTimeCheckbox.CheckedChanged += new System.EventHandler(this.automaticEndTimeCheckbox_CheckedChanged);
+            // 
             // WifiOverwatchMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(749, 901);
+            this.Controls.Add(this.automaticEndTimeCheckbox);
+            this.Controls.Add(this.endTimeTextBox);
+            this.Controls.Add(this.endTimeLabel);
             this.Controls.Add(this.saveSessionButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.autoReconnectFailureCountInputTextBox);
@@ -205,6 +240,9 @@ namespace WifiOverwatch
         private System.Windows.Forms.TextBox autoReconnectFailureCountInputTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button saveSessionButton;
+        private Label endTimeLabel;
+        private TextBox endTimeTextBox;
+        private CheckBox automaticEndTimeCheckbox;
     }
 }
 

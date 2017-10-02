@@ -19,6 +19,7 @@ namespace WifiOverwatch
         private int FailureCountForAutoRetry { get; set; }
         private WifiClient WifiConnectionClient { get; set; }
         private const string AccessPointName = "CHANEL";
+        private DateTime TimeToEnd { get; set; }
 
         public WifiOverwatchMainForm()
         {
@@ -56,7 +57,7 @@ namespace WifiOverwatch
                 MessageBox.Show(
                     @"Cannot save session while the ping operation is in progress, Please stop for the ping operation");
             }
-            if (string.IsNullOrEmpty(this.outputTextBox.Text))
+            if (string.IsNullOrEmpty(outputTextBox.Text))
             {
                 MessageBox.Show(@"Nothing to export, please run the Ping first");
                 return;
@@ -119,6 +120,26 @@ namespace WifiOverwatch
 
         private async Task StartPingingProcess()
         {
+            if (automaticEndTimeCheckbox.Checked)
+            {
+                TimeToEnd = DateTime.Now;
+                if (ValidateInput.IsNullOrEmpty(endTimeTextBox.Text, "The End Time text box cannot be null or empty"))
+                {
+                    return;
+                }
+                var validationResult = ValidateInput.IsValidTimeFormat(endTimeTextBox.Text, "hh:MM",
+                    "The time is in an invalid format please use hh:MM");
+                if (!validationResult.IsParseSuccessful)
+                {
+                    return;
+                }
+
+                TimeToEnd = TimeToEnd.Add(validationResult.Value);
+
+#pragma warning disable 4014
+                Task.Run(() => CountDown(TimeToEnd, validationResult.Value));
+            }
+
             if (quickTestCheckBox.Checked)
             {
                 for (var i = 0; i < 3; i++)
@@ -159,11 +180,11 @@ namespace WifiOverwatch
                 var isNumericResult = ValidateInput.IsNumeric(autoReconnectFailureCountInputTextBox.Text, "Only integers values are allowed in the field 'Auto Reconnect Failure Count'; " +
                                                                                                           "please re-enter the value to continue or leave it blank and a default " +
                                                                                                           "value of 4 would be used.");
-                if (!isNumericResult)
+                if (!isNumericResult.IsParseSuccessful)
                 {
                     return true;
                 }
-                FailureCountForAutoRetry = int.Parse(autoReconnectFailureCountInputTextBox.Text);
+                FailureCountForAutoRetry = isNumericResult.Value;
             }
             return false;
         }
@@ -246,9 +267,9 @@ namespace WifiOverwatch
 
         private void OutputValue(ResultSet resultSet)
         {
-            if (this.outputTextBox.InvokeRequired)
+            if (outputTextBox.InvokeRequired)
             {
-                this.outputTextBox.Invoke(new Action<ResultSet>(OutputValue), resultSet);
+                outputTextBox.Invoke(new Action<ResultSet>(OutputValue), resultSet);
             }
             else
             {
@@ -279,6 +300,35 @@ namespace WifiOverwatch
             {
                 outputTextBox.Clear();
             }
+        }
+
+        private void CountDown(DateTime timeToEnd, TimeSpan timeSpan)
+        {
+            if (!ContinuePingOperation)
+            {
+                return;
+            }
+
+            var breakups = timeSpan.TotalHours / 2;
+
+            do
+            {
+                Thread.Sleep(TimeSpan.FromHours(breakups));
+            } while (DateTime.Now < timeToEnd);
+
+            ContinuePingOperation = false;
+
+            var resultSet = new ResultSet()
+            {
+                DisplayColor = Color.Orange,
+                StringValue = "The ping operation has been auto shutdown."
+            };
+            OutputValue(resultSet);
+        }
+
+        private void automaticEndTimeCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            MessageBox.Show(@"Please enter number of hours you want this to ping operation to go for; in format hh:MM example 01:30 -> this will then run for one hour and thrity mins.");
         }
     }
 }
