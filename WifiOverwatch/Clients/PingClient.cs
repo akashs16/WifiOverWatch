@@ -32,7 +32,7 @@ namespace WifiOverwatch.Clients
             {
                 StringValue = $"pinging {result.Address} : {result.Status} with time {result.RoundtripTime}ms",
                 IsSuccessful = result.Status == IPStatus.Success,
-                DisplayColor = result.Status == IPStatus.Success ? Color.Green : Color.DeepPink
+                DisplayColor = result.Status == IPStatus.Success ? Color.Green : Color.Red
             };
         }
     }
