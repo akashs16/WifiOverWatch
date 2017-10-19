@@ -321,7 +321,7 @@ namespace WifiOverwatch
 
         private void automaticEndTimeCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            if (!this.automaticEndTimeCheckbox.Checked)
+            if (!automaticEndTimeCheckbox.Checked)
             {
                return; 
             }
