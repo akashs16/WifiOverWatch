@@ -1,36 +1,44 @@
 ﻿using System;
+using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using WifiOverwatch.Clients;
 
 namespace WifiOverwatch
 {
     public static class ValidateInput
     {
-        public static bool IsNullOrEmpty(string input, string message = null)
+        public static bool IsNullOrEmpty(string input, RichTextBox outputTextBox, string message = null)
         {
             var result = string.IsNullOrEmpty(input);
-
-            if (result)
+            var resultSet = new ResultSet()
             {
-                MessageBox.Show(string.IsNullOrEmpty(message)
-                    ? "Please enter correct input before proceeding"
-                    : message);
-            }
-
-            return result;
-        }
-
-        public static ParseResult<int> IsNumeric(string text, string message = null)
-        {
-            int intValue;
-            var result = int.TryParse(text, out intValue);
-
+                DisplayColor = Color.DeepPink
+            };
 
             if (!result)
             {
-                MessageBox.Show(string.IsNullOrEmpty(message)
-                    ? "The text can only contain numeric values."
-                    : message);
+                return false;
+            }
+
+            resultSet.StringValue = string.IsNullOrEmpty(message) ? "Please enter correct input before proceeding" : message;
+            FormClient.OutputValue(resultSet, outputTextBox);
+            return true;
+        }
+
+        public static ParseResult<int> IsNumeric(string text, RichTextBox outputTextBox, string message = null)
+        {
+            int intValue;
+            var result = int.TryParse(text, out intValue);
+            var resultSet = new ResultSet()
+            {
+                DisplayColor = Color.DeepPink
+            };
+
+            if (!result)
+            {
+                resultSet.StringValue = string.IsNullOrEmpty(message) ? "The text can only contain numeric values." : message;
+                FormClient.OutputValue(resultSet, outputTextBox);
             }
 
             return new ParseResult<int>()
@@ -40,13 +48,19 @@ namespace WifiOverwatch
             };
         }
 
-        public static ParseResult<TimeSpan> IsValidTimeFormat(string text, string timeFormat, string message = "Ilegal date time format")
+        public static ParseResult<TimeSpan> IsValidTimeFormat(string text, string timeFormat, RichTextBox outputTextBox, string message = "Ilegal date time format")
         {
             TimeSpan value;
+            var resultSet = new ResultSet()
+            {
+                DisplayColor = Color.DeepPink
+            };
+
             var format = GetFormatMatch(timeFormat);
             if (!MatchFormat(text, format))
             {
-                MessageBox.Show(message);
+                resultSet.StringValue = message;
+                FormClient.OutputValue(resultSet, outputTextBox);
                 return new ParseResult<TimeSpan>()
                 {
                     IsParseSuccessful = false

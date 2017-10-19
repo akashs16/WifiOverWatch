@@ -40,7 +40,7 @@ namespace WifiOverwatch
                 return;
             }
 
-            var nullOrEmptyResult = ValidateInput.IsNullOrEmpty(inputTextBox.Text, "The field 'Input Website/DNS to ping:' cannot be null or emptly, please enter a vaild site or ip to continue.");
+            var nullOrEmptyResult = ValidateInput.IsNullOrEmpty(inputTextBox.Text, outputTextBox, "The field 'Input Website/DNS to ping:' cannot be null or emptly, please enter a vaild site or ip to continue.");
             if (nullOrEmptyResult)
             {
                 return;
@@ -52,14 +52,20 @@ namespace WifiOverwatch
 
         private void saveSessionButton_Click(object sender, EventArgs e)
         {
+            var errorResultSet = new ResultSet()
+            {
+                DisplayColor = Color.DeepPink
+            };
             if (ContinuePingOperation)
             {
-                MessageBox.Show(
-                    @"Cannot save session while the ping operation is in progress, Please stop for the ping operation");
+                errorResultSet.StringValue = @"Cannot save session while the ping operation is in progress, Please stop for the ping operation";
+                FormClient.OutputValue(errorResultSet, outputTextBox);
+                return;
             }
             if (string.IsNullOrEmpty(outputTextBox.Text))
             {
-                MessageBox.Show(@"Nothing to export, please run the Ping first");
+                errorResultSet.StringValue = @"Nothing to export, please run the Ping first";
+                FormClient.OutputValue(errorResultSet, outputTextBox);
                 return;
             }
 
@@ -67,7 +73,8 @@ namespace WifiOverwatch
             var directoryName = Path.GetDirectoryName(path);
             if (directoryName == null)
             {
-                MessageBox.Show(@"The working directory was null cannot continue.");
+                errorResultSet.StringValue = @"The working directory was null cannot continue.";
+                FormClient.OutputValue(errorResultSet, outputTextBox);
                 return;
             }
             const string folderName = "Reports";
@@ -91,7 +98,8 @@ namespace WifiOverwatch
             }
             catch (Exception)
             {
-                MessageBox.Show($"The write operation failed; aborting save.");
+                errorResultSet.StringValue = @"The write operation failed; aborting save.";
+                FormClient.OutputValue(errorResultSet, outputTextBox);
                 File.Delete(filePath);
                 return;
             }
@@ -103,7 +111,7 @@ namespace WifiOverwatch
                 IsSuccessful = true,
                 StringValue = $"The session data is now saved on the path :{filePath}"
             };
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
         }
 
         private async Task StopPingingProcess()
@@ -115,7 +123,7 @@ namespace WifiOverwatch
                 StringValue = "Ping Operation Complete!"
             };
 
-            await Task.Run(() => OutputValue(resultSet));
+            await Task.Run(() => FormClient.OutputValue(resultSet, outputTextBox));
         }
 
         private async Task StartPingingProcess()
@@ -123,11 +131,11 @@ namespace WifiOverwatch
             if (automaticEndTimeCheckbox.Checked)
             {
                 TimeToEnd = DateTime.Now;
-                if (ValidateInput.IsNullOrEmpty(endTimeTextBox.Text, "The End Time text box cannot be null or empty"))
+                if (ValidateInput.IsNullOrEmpty(endTimeTextBox.Text, outputTextBox, "The End Time text box cannot be null or empty"))
                 {
                     return;
                 }
-                var validationResult = ValidateInput.IsValidTimeFormat(endTimeTextBox.Text, "hh:MM",
+                var validationResult = ValidateInput.IsValidTimeFormat(endTimeTextBox.Text, "hh:MM", outputTextBox,
                     "The time is in an invalid format please use hh:MM");
                 if (!validationResult.IsParseSuccessful)
                 {
@@ -177,7 +185,7 @@ namespace WifiOverwatch
             }
             else
             {
-                var isNumericResult = ValidateInput.IsNumeric(autoReconnectFailureCountInputTextBox.Text, "Only integers values are allowed in the field 'Auto Reconnect Failure Count'; " +
+                var isNumericResult = ValidateInput.IsNumeric(autoReconnectFailureCountInputTextBox.Text, outputTextBox, "Only integers values are allowed in the field 'Auto Reconnect Failure Count'; " +
                                                                                                           "please re-enter the value to continue or leave it blank and a default " +
                                                                                                           "value of 4 would be used.");
                 if (!isNumericResult.IsParseSuccessful)
@@ -203,7 +211,7 @@ namespace WifiOverwatch
                 IsSuccessful = false,
                 StringValue = "Starting the wifi reconnection procedure please wait...."
             };
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
 
             await Task.Run(() => CarryOutReconnectionProcedure());
         }
@@ -216,7 +224,7 @@ namespace WifiOverwatch
                 IsSuccessful = true,
                 StringValue = "Disconnecting from current network."
             };
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
             WifiConnectionClient.DisconnectWifi();
 
             resultSet = new ResultSet()
@@ -225,7 +233,7 @@ namespace WifiOverwatch
                 IsSuccessful = true,
                 StringValue = "Getting a list of access points."
             };
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
             var accessPoint = WifiConnectionClient.GetAccessPoints().First(x => string.Equals(x.Name, AccessPointName, StringComparison.InvariantCultureIgnoreCase));
 
             resultSet = new ResultSet()
@@ -235,7 +243,7 @@ namespace WifiOverwatch
                 StringValue = $"Trying to reconnect to access point: {AccessPointName}"
             };
             WifiConnectionClient.ReConnectWifi(accessPoint);
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
 
             resultSet = new ResultSet()
             {
@@ -243,41 +251,26 @@ namespace WifiOverwatch
                 IsSuccessful = true,
                 StringValue = $"Reconnection to {AccessPointName} complete, please try ping operation again."
             };
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
         }
 
         private void CarryOutPingOperation()
         {
             Thread.Sleep(SleepTimeSpan);
-            var pingResult = WebClient.CarryOutPings(inputTextBox.Text);
-            if (pingResult.NonRecoverableException)
+            var resultSet = WebClient.CarryOutPings(inputTextBox.Text);
+            if (resultSet.NonRecoverableException)
             {
                 ContinuePingOperation = false;
             }
-            if (!pingResult.IsSuccessful)
+            if (!resultSet.IsSuccessful)
             {
-                _failureQueue.Add(pingResult.IsSuccessful);
+                _failureQueue.Add(resultSet.IsSuccessful);
             }
             else
             {
                 _failureQueue.Clear();
             }
-            OutputValue(pingResult);
-        }
-
-        private void OutputValue(ResultSet resultSet)
-        {
-            if (outputTextBox.InvokeRequired)
-            {
-                outputTextBox.Invoke(new Action<ResultSet>(OutputValue), resultSet);
-            }
-            else
-            {
-                outputTextBox.SelectionBackColor = resultSet.DisplayColor;
-                outputTextBox.AppendText($"{DateTime.Now.ToString("yy-mm-dd:hh:MM:ss")} --> {resultSet.StringValue};\n");
-                outputTextBox.SelectionStart = outputTextBox.Text.Length;
-                outputTextBox.ScrollToCaret();
-            }
+            FormClient.OutputValue(resultSet, outputTextBox);
         }
 
         private void stopPingButton_Click(object sender, EventArgs e)
@@ -323,12 +316,24 @@ namespace WifiOverwatch
                 DisplayColor = Color.Orange,
                 StringValue = "The ping operation has been auto shutdown."
             };
-            OutputValue(resultSet);
+            FormClient.OutputValue(resultSet, outputTextBox);
         }
 
         private void automaticEndTimeCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            MessageBox.Show(@"Please enter number of hours you want this to ping operation to go for; in format hh:MM example 01:30 -> this will then run for one hour and thrity mins.");
+            if (!this.automaticEndTimeCheckbox.Checked)
+            {
+               return; 
+            }
+            var resultSet = new ResultSet()
+            {
+                DisplayColor = Color.Pink,
+                StringValue = @"Please enter number of hours you want this to ping operation to go for; in format hh:MM example 01:30 -> this will then run for one hour and thrity mins.",
+                IsSuccessful = false,
+                NonRecoverableException = true
+            };
+
+            FormClient.OutputValue(resultSet, outputTextBox);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Net.NetworkInformation;
-using System.Windows.Forms;
 
 namespace WifiOverwatch.Clients
 {
@@ -16,11 +15,10 @@ namespace WifiOverwatch.Clients
             }
             catch (PingException)
             {
-                MessageBox.Show(
-                    $"Cannot resolve {pingDestination}, please check the internet connection before continuing.");
-
                 var resultSet = new ResultSet()
                 {
+                    DisplayColor = Color.DeepPink,
+                    StringValue = $"Cannot resolve {pingDestination}, please check the internet connection before continuing.",
                     NonRecoverableException = true
                 };
 
@@ -34,7 +32,7 @@ namespace WifiOverwatch.Clients
             {
                 StringValue = $"pinging {result.Address} : {result.Status} with time {result.RoundtripTime}ms",
                 IsSuccessful = result.Status == IPStatus.Success,
-                DisplayColor = result.Status == IPStatus.Success ? Color.Green : Color.Red
+                DisplayColor = result.Status == IPStatus.Success ? Color.Green : Color.DeepPink
             };
         }
     }
