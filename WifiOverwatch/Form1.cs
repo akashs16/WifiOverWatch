@@ -204,7 +204,7 @@ namespace WifiOverwatch
                 return;
             }
 
-            ContinuePingOperation = false;
+            ContinuePingOperation = true;
             var resultSet = new ResultSet()
             {
                 DisplayColor = Color.Orange,
@@ -249,7 +249,7 @@ namespace WifiOverwatch
             {
                 DisplayColor = Color.AliceBlue,
                 IsSuccessful = true,
-                StringValue = $"Reconnection to {AccessPointName} complete, please try ping operation again."
+                StringValue = $"Reconnection to {AccessPointName} complete"
             };
             FormClient.OutputValue(resultSet, outputTextBox);
         }
